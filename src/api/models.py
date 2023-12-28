@@ -1,12 +1,16 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import DateTime
 
 db = SQLAlchemy()
 
 class User(db.Model):
+    # Información de columnas
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    active = db.Column(db.Boolean(), nullable=True)
+    password = db.Column(db.String(200), unique=False, nullable=False)
+    last_login = db.Column(db.DateTime())
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -14,6 +18,19 @@ class User(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "username": self.username,
             "email": self.email,
-            # do not serialize the password, its a security breach
+            "active": self.active,
+            "last_login": self.last_login,
         }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+    
+    def update(self):
+        db.session.commit()
+    
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
